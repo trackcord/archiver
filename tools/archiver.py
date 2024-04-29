@@ -33,17 +33,13 @@ class Archiver(Client):
             len(self.guilds),
         )
 
-        # get all config.Scraper.guild_id channels
-        # get all messages from the channels
-        # archive the messages
-
         guild = self.get_guild(config.Scraper.guild_id)
         if guild is None:
             return log.error("Guild %s not found.", config.Scraper.guild_id)
 
         log.info("Archiving guild %s (%s).", guild.name, guild.id)
 
-        messages: list[tuple[int, str, str, int, int, str]] = []
+        messages: list[tuple[int, str, str, int, int, int, str]] = []
 
         for channel in guild.text_channels:
             if not channel.permissions_for(guild.me).read_message_history:
@@ -70,13 +66,14 @@ class Archiver(Client):
                         message.content,
                         message.guild.name,
                         message.guild.id,
+                        message.channel.id,
                         int(message.created_at.timestamp()),
                         message.attachments[0].url if message.attachments else None,
                     )
                 )
 
                 log.info(
-                    "Archived message %s (%s) from %s in %s (%s).",
+                    "Archived message %s (%s) by %s (%s) in %s (%s).",
                     message.id,
                     message.author.name,
                     message.author.id,
@@ -87,7 +84,7 @@ class Archiver(Client):
         log.info("Archived %s messages.", len(messages))
 
         await self.db.executemany(
-            "INSERT INTO messages (user_id, message, guild_name, guild_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
+            "INSERT INTO messages (user_id, message, guild_name, guild_id, channel_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
             messages,
         )
 

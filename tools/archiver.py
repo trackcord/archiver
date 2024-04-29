@@ -40,6 +40,8 @@ class Archiver(Client):
 
         log.info("Archiving guild %s (%s).", guild.name, guild.id)
 
+        messages: list[dict[str, str]] = []
+
         for channel in guild.text_channels:
             if not channel.permissions_for(guild.me).read_message_history:
                 log.warning(
@@ -59,8 +61,21 @@ class Archiver(Client):
                 ):
                     continue
 
+                messages.append(
+                    {
+                        "user_id": message.author.id,
+                        "message": message.content,
+                        "guild_name": message.guild.name,
+                        "guild_id": message.guild.id,
+                        "timestamp": int(message.created_at.timestamp()),
+                        "attachment": (
+                            message.attachments[0].url if message.attachments else None
+                        ),
+                    }
+                )
+
                 log.info(
-                    "Archived message %s by %s (%s) in channel %s (%s).",
+                    "Archived message %s (%s) from %s in %s (%s).",
                     message.id,
                     message.author.name,
                     message.author.id,
@@ -68,20 +83,15 @@ class Archiver(Client):
                     channel.id,
                 )
 
-                await self.db.execute(
-                    "INSERT INTO messages (user_id, message, guild_name, guild_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
-                    message.author.id,
-                    message.content,
-                    message.guild.name,
-                    message.guild.id,
-                    int(message.created_at.timestamp()),
-                    message.attachments[0].url if message.attachments else None,
-                )
+        log.info("Archived %s messages.", len(messages))
 
-            log.info("Archived channel %s (%s).", channel.name, channel.id)
+        await self.db.execute_many(
+            "INSERT INTO messages (user_id, message, guild_name, guild_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
+            messages,
+        )
 
-        log.info("Archived guild %s (%s).", guild.name, guild.id)
+        log.info("Inserted %s messages.", len(messages))
 
-    async def disconnect(self: "Archiver") -> None:
+    async def close(self: "Archiver") -> None:
         await self.db.close()
         await super().close()

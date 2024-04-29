@@ -27,7 +27,10 @@ class Archiver(Client):
 
     async def on_ready(self: "Archiver") -> None:
         log.info(
-            f"Logged in as {self.user.name} ({self.user.id}) with {len(self.guilds)} guilds."
+            "Logged in as %s (%s) with %s guilds.",
+            self.user.name,
+            self.user.id,
+            len(self.guilds),
         )
 
         # get all config.Scraper.guild_id channels
@@ -40,7 +43,7 @@ class Archiver(Client):
 
         log.info("Archiving guild %s (%s).", guild.name, guild.id)
 
-        messages: list[dict[str, str]] = []
+        messages: list[tuple[int, str, str, int, int, str]] = []
 
         for channel in guild.text_channels:
             if not channel.permissions_for(guild.me).read_message_history:
@@ -62,16 +65,14 @@ class Archiver(Client):
                     continue
 
                 messages.append(
-                    {
-                        "user_id": message.author.id,
-                        "message": message.content,
-                        "guild_name": message.guild.name,
-                        "guild_id": message.guild.id,
-                        "timestamp": int(message.created_at.timestamp()),
-                        "attachment": (
-                            message.attachments[0].url if message.attachments else None
-                        ),
-                    }
+                    (
+                        message.author.id,
+                        message.content,
+                        message.guild.name,
+                        message.guild.id,
+                        int(message.created_at.timestamp()),
+                        message.attachments[0].url if message.attachments else None,
+                    )
                 )
 
                 log.info(

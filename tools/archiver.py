@@ -66,7 +66,7 @@ class Archiver(Client):
                     messages.append(
                         (
                             message.author.id,
-                            message.content,
+                            message.content.replace("\x00", ""),
                             message.guild.name,
                             message.guild.id,
                             message.channel.id,

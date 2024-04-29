@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from discord import Client, Guild
+from discord import Client
 
 import config
 from tools.managers import database, logging
@@ -50,7 +50,13 @@ class Archiver(Client):
                 ):
                     continue
 
-                log.info("Archiving message %s sent by %s.", message.id, message.author)
+                log.info(
+                    "Archived message %s (%s) by %s (%s).",
+                    message.content,
+                    message.id,
+                    message.author.name,
+                    message.author.id,
+                )
 
                 await self.db.execute(
                     "INSERT INTO messages (user_id, message, guild_name, guild_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
@@ -61,11 +67,10 @@ class Archiver(Client):
                     int(message.created_at.timestamp()),
                     message.attachments[0].url if message.attachments else None,
                 )
-            
+
             log.info("Archived channel %s (%s).", channel.name, channel.id)
 
         log.info("Archived guild %s (%s).", guild.name, guild.id)
-
 
     async def disconnect(self: "Archiver") -> None:
         await self.db.close()

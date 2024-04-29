@@ -1,0 +1,4 @@
+services:
+  archiver:
+    container_name: archive
+    build: .

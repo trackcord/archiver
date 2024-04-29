@@ -16,6 +16,7 @@ class Archiver(Client):
         super().__init__(
             command_prefix="---",
             help_command=None,
+            chunk_guilds_at_startup=False,
             *args,
             **kwargs,
         )

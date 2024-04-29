@@ -57,6 +57,7 @@ class Archiver(Client):
                 async for message in channel.history(limit=None):
                     if (
                         message.author.bot
+                        or message.author.name == "Deleted User"
                         or message.content == ""
                         and not message.attachments
                     ):

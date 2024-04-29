@@ -52,33 +52,43 @@ class Archiver(Client):
 
             log.info("Archiving channel %s (%s).", channel.name, channel.id)
 
-            async for message in channel.history(limit=None):
-                if (
-                    message.author.bot
-                    or message.content == ""
-                    and not message.attachments
-                ):
-                    continue
+            try:
+                    
+                async for message in channel.history(limit=None):
+                    if (
+                        message.author.bot
+                        or message.content == ""
+                        and not message.attachments
+                    ):
+                        continue
 
-                messages.append(
-                    (
-                        message.author.id,
-                        message.content,
-                        message.guild.name,
-                        message.guild.id,
-                        message.channel.id,
-                        int(message.created_at.timestamp()),
-                        message.attachments[0].url if message.attachments else None,
+                    messages.append(
+                        (
+                            message.author.id,
+                            message.content,
+                            message.guild.name,
+                            message.guild.id,
+                            message.channel.id,
+                            int(message.created_at.timestamp()),
+                            message.attachments[0].url if message.attachments else None,
+                        )
                     )
-                )
 
-                log.info(
-                    "Archived message %s from %s (%s) in %s (%s).",
-                    message.id,
-                    message.author.name,
-                    message.author.id,
-                    message.channel.name,
-                    message.channel.id,
+                    log.info(
+                        "Archived message %s from %s (%s) in %s (%s).",
+                        message.id,
+                        message.author.name,
+                        message.author.id,
+                        message.channel.name,
+                        message.channel.id,
+                    )
+            except Exception as e:
+                log.error(
+                    "Failed to archive channel %s (%s): %s, however we got %s messages.",
+                    channel.name,
+                    channel.id,
+                    e,
+                    len(messages),
                 )
 
         log.info(

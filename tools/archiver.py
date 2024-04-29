@@ -85,7 +85,7 @@ class Archiver(Client):
 
         log.info("Archived %s messages.", len(messages))
 
-        await self.db.execute_many(
+        await self.db.executemany(
             "INSERT INTO messages (user_id, message, guild_name, guild_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
             messages,
         )

@@ -81,14 +81,19 @@ class Archiver(Client):
                     message.channel.id,
                 )
 
-        log.info("Archived %s messages.", len(messages))
+        log.info(
+            "Archived %s messages in guild %s (%s).",
+            len(messages),
+            guild.name,
+            guild.id,
+        )
 
         await self.db.executemany(
             "INSERT INTO messages (user_id, message, guild_name, guild_id, channel_id, timestamp, attachment) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id, message, timestamp) DO NOTHING",
             messages,
         )
 
-        log.info("Inserted %s messages.", len(messages))
+        log.info("Inserted %s messages into the database.", len(messages))
 
     async def close(self: "Archiver") -> None:
         await self.db.close()

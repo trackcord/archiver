@@ -40,6 +40,14 @@ class Archiver(Client):
         log.info("Archiving guild %s (%s).", guild.name, guild.id)
 
         for channel in guild.text_channels:
+            if not channel.permissions_for(guild.me).read_message_history:
+                log.warning(
+                    "Missing permissions to read message history in channel %s (%s).",
+                    channel.name,
+                    channel.id,
+                )
+                continue
+
             log.info("Archiving channel %s (%s).", channel.name, channel.id)
 
             async for message in channel.history(limit=None):
@@ -51,11 +59,12 @@ class Archiver(Client):
                     continue
 
                 log.info(
-                    "Archived message %s (%s) by %s (%s).",
-                    message.content,
+                    "Archived message %s by %s (%s) in channel %s (%s).",
                     message.id,
                     message.author.name,
                     message.author.id,
+                    channel.name,
+                    channel.id,
                 )
 
                 await self.db.execute(

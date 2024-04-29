@@ -3,6 +3,8 @@ FROM python:alpine
 # Set the working directory
 WORKDIR /archiver
 
+RUN apk add --no-cache git
+
 # Copy the current directory contents into the container at /archiver
 COPY requirements.txt /archiver
 

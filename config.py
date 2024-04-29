@@ -5,7 +5,7 @@ class Worker:
 
 
 class Scraper:
-    guild_id: int = 1207691698386501634
+    guild_id: int = 997328223597772890
 
 
 class Database:

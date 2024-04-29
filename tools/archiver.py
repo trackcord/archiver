@@ -53,7 +53,6 @@ class Archiver(Client):
             log.info("Archiving channel %s (%s).", channel.name, channel.id)
 
             try:
-                    
                 async for message in channel.history(limit=None):
                     if (
                         message.author.bot

@@ -73,12 +73,12 @@ class Archiver(Client):
                 )
 
                 log.info(
-                    "Archived message %s (%s) by %s (%s) in %s (%s).",
+                    "Archived message %s from %s (%s) in %s (%s).",
                     message.id,
                     message.author.name,
                     message.author.id,
-                    channel.name,
-                    channel.id,
+                    message.channel.name,
+                    message.channel.id,
                 )
 
         log.info("Archived %s messages.", len(messages))
